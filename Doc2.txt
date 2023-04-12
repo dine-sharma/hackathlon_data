@@ -1,0 +1,27 @@
+Objective
+This document describes the cell balancing algorithm in detail. It also provides insights into some of the important concepts pertaining to passive cell balancing. 
+General Concepts
+Balancing
+Cell balancing is a way of compensating for the weaker cells by equalizing the charge on all the cells in the chain, thus extending the battery life. 
+Passive balancing allows the stack to look like every cell has the same capacity as the weakest cell. Using a relatively low current, it drains a small amount of energy from high SoC cells during the charging cycle so that all cells charge to their maximum SoC. This is accomplished by using a switch and bleed resistor in parallel with each battery cell.
+Free-Safe LT uses passive cell balancing.
+Balancing in FreeSafe LT
+Architecture
+
+
+FreeSafe LT products use BQ7694003 AFE. AFE measures and communicates cell voltages to MCU over I2C lines.
+MCU processes all cell voltages and based on the balancing algorithm, sends a command to start/stop balancing to the AFE.
+The AFE processes the command and starts/stops balancing on requested cells.
+FS-LT uses an external balancing circuit.
+Fast Voltage Acquisition is used when going from Sleep to Glimpse mode. In Running mode, Fast Voltage Acquisition is not used and cell voltages are updated every 800 milliseconds.
+
+Cell Voltage acquisition
+Cell voltages are either acquired using Fast mode or using Normal mode. Fast mode is only used when reading cell voltages in Glimpse mode.
+
+Balancing algorithm
+
+Cell voltages are acquired in runMedium process(100 mS) and the temperature readings are acquired in runSlow process (1 S).
+The decision to balance a cell or not is taken in runMedium process and action is taken in runSlow process.
+stopBalancingThreshold (ID 28) and forceBalancingThresold (ID 27) are SD card configuration parameters.
+After balancing timer expires, balancing is stopped for a loop to get accurate voltage readings. So every time balancing timer(currently set to 5 seconds in FW) elapses, balancing is stopped to get an accurate cell voltage reading.
+Appropriate balancing action is taken once cell voltages are read successfully on the next run of the balancing algorithm.
