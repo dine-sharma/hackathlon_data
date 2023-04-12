@@ -1,0 +1,50 @@
+System Level Impact Analysis:
+System Context:
+ Application: The CT Lite BMS is designed for low voltage 2-3W automotive application. Light electric mobility is mostly used in urban/ city travel where the vehicle mostly rests in the night condition giving an idle time of 7-8 hrs to the battery. 
+CT-Lite specifications: The maximum continuous current supported by the CT-LL- 50A  board is 50A and for operation at 1-C rate, the maximum supported battery capacity is around 50Ah. Only 8 channels are recommended to be balanced at a time
+Ideal system: For BMS to able to balance the pack well and allow optimum power delivery, the maximum  imbalance present in a healthy pack < =1% SoC. The battery pack shall not be integrated with cells without impedance matching/ degraded SOH to prevent creation of high imbalance in the system.
+Theoretical calculations
+For the above defined application and system , following is the analysis to resolve the imbalance:
+1% SoC imbalance in a 50Ah battery pack corresponding to 0.5Ah = 500mAh. It can range from following voltage ranges:
+For NMC chemistry: 10mV Avg
+For LFP chemistry: 20-60mV at end of charge
+For resolving 1% SoC imbalance present in 1 cell channel in 7-8 hours overnight when the battery is in idle state,
+Balancing current needed = Imbalance in Ah/Target  Balancing time
+=> Balancing current needed=  62.5 mA/ channel which is around 30% duty cycle of SOR spec
+
+
+Case 1: Worst case scenario (8 channels - 55 degrees)
+Highly unbalanced pack where 8 channels need balancing (1% SoC imbalance) at an ambient temperature of 55 degrees. The probability of occurrence of the scenario is less as:
+ The climatic condition to go > 55 degree is low.
+Also the board temperature  in idle state of the battery will not be high due to PDU operations shutdown.
+
+Total balancing current needed = 62.5 * 8 mA =  500mA  > Total balancing current allowed at 55 degree ambient = 355mA (as per Hw issue investigation analysis)
+
+
+Conclusion: In this case, the BMS may take upto 11 hrs ( longer than 8 hrs) to balance the pack.
+But the impact is acceptable as the imbalance is high and the temperature conditions are on extreme ends and the occurrence of the scenario is low.
+Case 2: Best case scenario (8 channels - 25 degrees)
+Highly unbalanced pack where 8 channels need balancing (1% SoC imbalance) at an ambient temperature of 25 degrees.
+
+Total balancing current needed = 62.5 * 8 mA =  500mA  < Total balancing current allowed at 25 degree ambient = 1880mA (as per Hw issue investigation analysis)
+
+
+Conclusion: In this case, the BMS will balance all the channels in 2.5hrs only.  
+
+System Analysis
+From the above two scenarios, the overall system impact due to reduced duty cycle with change in ambient temperature is low as the currently achievable duty cycle is enough to meet the balancing requirements of the 2-3Kwh battery packs used in light mobility applications with day time usage and average idle time of 7-8 hrs.
+Conclusion
+The External Balancing Resistors being on the same and so close to the AFE causes all that  heat to reach AFE.
+Practically the temperature rise due to AFE itself is 8°C  for 8 cells balancing above the already 18°C risen temperature.
+Solution :
+ 
+Increase the value of balancing Resistors from 100 Ω to 330 Ω 
+Impact: Theoretical reduction in rise of internal temperature from 7°C to 1°C .
+
+Firmware Algorithm to limit number of cells being balanced/ balancing duty cycle:
+Approach 1 : limit max total balancing current to theoretical max found at 55°C to 355mA
+Approach 2: limit max total balancing current with respect to the ambient temperature with reference from Table 2.
+Approach 3: Have a PI controller to maintain the AFE temperature to the optimum value . This approach provides optimum use of the AFE capability. This also ensured optimum performance in different types of battery casing.
+
+
+The equations that support the implementation of Approach 2 can be found here
